@@ -59,7 +59,11 @@ typedef struct queryresponse{
 
 int checkquery(char* user_input){
 
-    int N = user_input[6] - '0';
+    char user_input2[1024];
+    strcpy(user_input2, user_input);
+    char *token = strtok(user_input2, " ");
+    token = strtok(NULL, " ");
+    int N = strtol(token, NULL, 10);
     int i = 8;
     int j = 0;
 
@@ -104,7 +108,11 @@ int checkquery(char* user_input){
 
 void constructSIMDNSquery(char* user_input, simDNSquery* query){
 
-    int N = user_input[6] - '0';
+    char user_input2[1024];
+    strcpy(user_input2, user_input);
+    char *token = strtok(user_input2, " ");
+    token = strtok(NULL, " ");
+    int N = strtol(token, NULL, 10);
     int i = 8;
     int j = 0;
 
@@ -134,7 +142,7 @@ void constructSIMDNSquery(char* user_input, simDNSquery* query){
     while(i < strlen(user_input)){
         char domain[32];
         int k = 0;
-        while(user_input[i] != ' ' && i < strlen(user_input)){
+        while(i < strlen(user_input) && user_input[i] != ' '){
             domain[k] = user_input[i];
             k++;
             i++;
@@ -232,8 +240,11 @@ int main(){
 
     unsigned char dest_mac[6];
     char dest_mac_str[18];
-    printf("Enter destination MAC address: ");
-    scanf("%s", dest_mac_str);
+    printf("Enter destination MAC address: \n");
+    fgets(dest_mac_str, 18, stdin);
+    dest_mac_str[strcspn(dest_mac_str, "\n")] = '\0';
+
+    // strcpy(dest_mac_str, "00:0c:29:4f:8e:5f");
 
     for(int i = 0; i < 6; i++){
         dest_mac[i] = strtol(dest_mac_str + i*3, NULL, 16);
@@ -244,10 +255,6 @@ int main(){
 
     memcpy(saddr.sll_addr, dest_mac, 6);
 
-    printf("Destination MAC address: ");
-    for(int i = 0; i < 6; i++){
-        printf("%02x:", dest_mac[i]);
-    }
 
     eth_header->h_proto = htons(ETH_P_IP);
 
@@ -263,7 +270,7 @@ int main(){
     ip_header->ttl = 64;
     ip_header->protocol = 254;
     ip_header->saddr = inet_addr("10.145.80.27");
-    ip_header->daddr = inet_addr("10.145.27.193");
+    ip_header->daddr = inet_addr("10.145.80.27");
 
     computechecksum(ip_header, sizeof(struct iphdr));
 
@@ -280,6 +287,7 @@ int main(){
     memset(IDTable, 0, sizeof(IDTable));
 
     int f = 1;
+    int first = 1;
     while(1){
 
         if(f==1){
@@ -355,7 +363,7 @@ int main(){
             // }
 
             // printf(" Bool %d\n", ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.27.193") == 0);
-            if(ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.27.193") == 0){    
+            if(ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.80.27") == 0){    
                 // printf("Received a DNS response\n");
                 simDNSresponse* response = (simDNSresponse*)(packet_recv + sizeof(struct ethhdr) + sizeof(struct iphdr));
 
@@ -395,8 +403,12 @@ int main(){
 
         if(FD_ISSET(STDIN_FILENO, &readfds)){
 
-            fgets(user_input, 1024, stdin);
-            user_input[strlen(user_input)-1] = '\0';
+            if(first == 1){
+                fgets(user_input, 1000, stdin);
+                first = 0;
+            }
+            fgets(user_input, 1000, stdin);
+            user_input[strcspn(user_input, "\n")] = '\0';
 
             // Check if it is EXIT command
             if(strcmp(user_input, "EXIT") == 0){
@@ -404,7 +416,14 @@ int main(){
                 break;
             }
 
-            int N = user_input[6] - '0';
+            char user_input2[1024];
+            memset(user_input2, '\0', sizeof(user_input2));
+            // printf("User input: %s\n", user_input);
+            strcpy(user_input2, user_input);
+            char *token = strtok(user_input2, " ");
+            token = strtok(NULL, " ");
+            int N = strtol(token, NULL, 10);
+            // printf("N: %d\n", N);
             if(N > 8){
                 printf("ERR: N should be less than or equal to 8\n");
                 memset(user_input, '\0', sizeof(user_input));

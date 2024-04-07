@@ -48,7 +48,7 @@ int dropmessage(float prob){
     // Always different random number
     srand(time(0));
     float r = (float)rand()/(float)(RAND_MAX);
-    printf("Random number: %f\n", r);
+    // printf("Random number: %f\n", r);
     if(r < prob){
         printf("message dropped\n");
         return 1;
