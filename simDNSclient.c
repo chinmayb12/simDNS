@@ -217,7 +217,6 @@ int main(){
     saddr.sll_protocol = htons(ETH_P_ALL);
     saddr.sll_ifindex = if_nametoindex(INTERFACE);
     saddr.sll_halen = 6;
-    memcpy(saddr.sll_addr, "\xFF\xFF\xFF\xFF\xFF\xFF", 6);
 
     int saddr_len = sizeof(saddr);
 
@@ -230,9 +229,26 @@ int main(){
         perror("ioctl failed");
         exit(1);
     }
+
+    unsigned char dest_mac[6];
+    char dest_mac_str[18];
+    printf("Enter destination MAC address: ");
+    scanf("%s", dest_mac_str);
+
+    for(int i = 0; i < 6; i++){
+        dest_mac[i] = strtol(dest_mac_str + i*3, NULL, 16);
+    }
     
     memcpy(eth_header->h_source, ifr.ifr_hwaddr.sa_data, 6);
-    memcpy(eth_header->h_dest, "\xF8\x89\xD2\xE6\x40\x71", 6);
+    memcpy(eth_header->h_dest, dest_mac, 6);
+
+    memcpy(saddr.sll_addr, dest_mac, 6);
+
+    printf("Destination MAC address: ");
+    for(int i = 0; i < 6; i++){
+        printf("%02x:", dest_mac[i]);
+    }
+
     eth_header->h_proto = htons(ETH_P_IP);
 
 
@@ -338,8 +354,8 @@ int main(){
             //     printf("Code: %d\n", icmp->code);
             // }
 
-
-            if(ip->protocol == 254){    
+            // printf(" Bool %d\n", ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.27.193") == 0);
+            if(ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.27.193") == 0){    
                 // printf("Received a DNS response\n");
                 simDNSresponse* response = (simDNSresponse*)(packet_recv + sizeof(struct ethhdr) + sizeof(struct iphdr));
 
@@ -361,7 +377,7 @@ int main(){
 
                             }
                             else{
-                                printf("NOTFOUND\n");
+                                printf("NOT FOUND\n");
                             }
 
                         }
