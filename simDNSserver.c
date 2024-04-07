@@ -17,8 +17,8 @@
 #include <netdb.h>
 #include <time.h>
 
-// #define INTERFACE "wlp3s0"
-#define INTERFACE "enp2s0"
+#define INTERFACE "wlp3s0"
+// #define INTERFACE "enp2s0"
 #define p 0.3
 
 typedef struct query{
@@ -83,6 +83,7 @@ int main(){
     serv_addr.sll_family = AF_PACKET;
     serv_addr.sll_protocol = htons(ETH_P_ALL);
     serv_addr.sll_ifindex = if_nametoindex(INTERFACE);
+
 
     if(bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0){
         perror("Socket bind failed");

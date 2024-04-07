@@ -16,8 +16,8 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 
-// #define INTERFACE "wlp3s0"
-#define INTERFACE "enp2s0"
+#define INTERFACE "wlp3s0"
+// #define INTERFACE "enp2s0"
 
 #define TIMEOUT 20
 
@@ -216,6 +216,8 @@ int main(){
     saddr.sll_family = AF_PACKET;
     saddr.sll_protocol = htons(ETH_P_ALL);
     saddr.sll_ifindex = if_nametoindex(INTERFACE);
+    saddr.sll_halen = 6;
+    memcpy(saddr.sll_addr, "\xFF\xFF\xFF\xFF\xFF\xFF", 6);
 
     int saddr_len = sizeof(saddr);
 
@@ -379,6 +381,13 @@ int main(){
 
             fgets(user_input, 1024, stdin);
             user_input[strlen(user_input)-1] = '\0';
+
+            // Check if it is EXIT command
+            if(strcmp(user_input, "EXIT") == 0){
+                printf("Exiting...\n");
+                break;
+            }
+
             int N = user_input[6] - '0';
             if(N > 8){
                 printf("ERR: N should be less than or equal to 8\n");
