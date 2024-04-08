@@ -111,10 +111,10 @@ void constructSIMDNSquery(char* user_input, simDNSquery* query){
     char user_input2[1024];
     strcpy(user_input2, user_input);
     char *token = strtok(user_input2, " ");
+    int len = strlen(token);
     token = strtok(NULL, " ");
     int N = strtol(token, NULL, 10);
-    int i = 8;
-    int j = 0;
+
 
     // Generate ID for the query not in the table
     uint16_t ID = rand() % INT16_MAX;
@@ -139,26 +139,22 @@ void constructSIMDNSquery(char* user_input, simDNSquery* query){
     // printf("NumQueries: %d\n", query->NumQueries);
     // printf("MessageType: %d\n", query->MessageType);
 
-    while(i < strlen(user_input)){
-        char domain[32];
-        int k = 0;
-        while(i < strlen(user_input) && user_input[i] != ' '){
-            domain[k] = user_input[i];
-            k++;
-            i++;
+    int cnt = 0;
+    token = strtok(NULL, " ");
+    while(cnt < N && token != NULL){
+        
+        // printf("Domain: %s\n", token);
+        int domain_size = strlen(token);
+        query->QueryStrings[cnt].DomainSize = htonl(domain_size);
+        IDTable[ID].query.QueryStrings[cnt].DomainSize = domain_size;
+        for(int i = 0; i < domain_size; i++){
+            query->QueryStrings[cnt].DomainName[i] = token[i];
+            IDTable[ID].query.QueryStrings[cnt].DomainName[i] = token[i];
         }
-        i++;
-        query->QueryStrings[j].DomainSize = htonl(k);
-        IDTable[ID].query.QueryStrings[j].DomainSize = k;
-        // printf("DomainSize: %d\n", k);
-        // printf("DomainName: ");
-        for(int l = 0; l < k; l++){
-            query->QueryStrings[j].DomainName[l] = domain[l];
-            IDTable[ID].query.QueryStrings[j].DomainName[l] = domain[l];
-            // printf("%c", domain[l]);
-        }
-        j++;
-        // printf("\n");
+
+        token = strtok(NULL, " ");
+
+        cnt++;
     }
 
 }
@@ -421,6 +417,15 @@ int main(){
             // printf("User input: %s\n", user_input);
             strcpy(user_input2, user_input);
             char *token = strtok(user_input2, " ");
+
+            if(strcmp(token,"getIP") != 0){
+                printf("ERR: Invalid command\n");
+                printf("Usage: getIP <N> <domain1> <domain2> ... <domainN>\n");
+                memset(user_input, '\0', sizeof(user_input));
+                f = 1;
+                continue;
+            }
+
             token = strtok(NULL, " ");
             int N = strtol(token, NULL, 10);
             // printf("N: %d\n", N);
