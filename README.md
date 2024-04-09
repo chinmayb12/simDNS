@@ -7,4 +7,4 @@ Instructions to run the code -
 5. Query the domain whose IP you want on the client side in the way as follows -
    * Usage: getIP `<N>` `<domain1>` `<domain2>` ... `<domainN>`
 6. You will receive the response if the message is not dropped.
-7. To change the probablity to drop the message there is MACRO in simDNSserver.c named p which is needs to be changed accordingly.
+7. To change the probablity to drop the message there is MACRO in simDNSserver.c named p which needs to be changed accordingly.
