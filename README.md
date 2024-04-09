@@ -1,4 +1,4 @@
-Instructionns to run the code -
+Instructions to run the code -
 
 1. Change the interface macro value in both simDNSclient.c and simDNSserver.c depending on which interface you are using ensure both interfaces are same.
 2. Run the makefile - makfile all
