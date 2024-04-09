@@ -56,6 +56,18 @@ int dropmessage(float prob){
     return 0;
 }
 
+int verifychecksum(struct iphdr* ip_header, int len){
+    unsigned short* buffer = (unsigned short*)ip_header;
+    int sum = 0;
+    for(int i = 0; i < len/2; i++){
+        sum += buffer[i];
+    }
+    while(sum >> 16){
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+    return sum == 0xFFFF;
+}
+
 
 void computechecksum(struct iphdr* ip_header, int len){
     unsigned short* buffer = (unsigned short*)ip_header;
@@ -113,6 +125,13 @@ int main(){
                     continue;
                 }
                 simDNSquery* query = (simDNSquery*)(packet + sizeof(struct ethhdr) + sizeof(struct iphdr));
+
+                int flag = verifychecksum(ip,sizeof(struct iphdr));
+
+                if(flag == 0){
+                    printf("Checksum verification failed\n");
+                    continue;
+                }
 
                 // printf("Received a DNS query\n");
                 // printf("ID: %d\n", ntohs(query->ID));

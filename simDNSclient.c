@@ -265,8 +265,8 @@ int main(){
     ip_header->frag_off = 0;
     ip_header->ttl = 64;
     ip_header->protocol = 254;
-    ip_header->saddr = inet_addr("10.145.80.27");
-    ip_header->daddr = inet_addr("10.145.80.27");
+    ip_header->saddr = inet_addr("127.0.0.1");
+    ip_header->daddr = inet_addr("127.0.0.1");
 
     computechecksum(ip_header, sizeof(struct iphdr));
 
@@ -358,9 +358,8 @@ int main(){
             //     printf("Code: %d\n", icmp->code);
             // }
 
-            // printf(" Bool %d\n", ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.27.193") == 0);
-            if(ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"10.145.80.27") == 0){    
-                // printf("Received a DNS response\n");
+            if(ip->protocol == 254 && strcmp(inet_ntoa(*(struct in_addr*)&ip->saddr),"127.0.0.1") == 0){    
+
                 simDNSresponse* response = (simDNSresponse*)(packet_recv + sizeof(struct ethhdr) + sizeof(struct iphdr));
 
                 if(response->MessageType == 1){
@@ -414,7 +413,6 @@ int main(){
 
             char user_input2[1024];
             memset(user_input2, '\0', sizeof(user_input2));
-            // printf("User input: %s\n", user_input);
             strcpy(user_input2, user_input);
             char *token = strtok(user_input2, " ");
 
@@ -428,7 +426,6 @@ int main(){
 
             token = strtok(NULL, " ");
             int N = strtol(token, NULL, 10);
-            // printf("N: %d\n", N);
             if(N > 8){
                 printf("ERR: N should be less than or equal to 8\n");
                 memset(user_input, '\0', sizeof(user_input));
@@ -451,13 +448,8 @@ int main(){
 
             // Send the query message
             memcpy(packet + sizeof(struct ethhdr) + sizeof(struct iphdr), query, sizeof(simDNSquery));
-            // memcpy(packet + sizeof(struct iphdr), query, sizeof(simDNSquery));
 
-            // printf("Total length: %ld\n",sizeof(struct iphdr) + sizeof(simDNSquery));
-            // printf("Total length: %ld\n", sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(simDNSquery));
             int ret = sendto(sockfd, packet, sizeof(struct ethhdr) + sizeof(struct iphdr) + sizeof(simDNSquery), 0, (struct sockaddr*)&saddr, saddr_len);
-            // int ret = sendto(sockfd, packet, sizeof(struct iphdr) + sizeof(simDNSquery), 0, (struct sockaddr*)&saddr, saddr_len);
-            // printf("Ret %d\n", ret);
 
             if(ret < 0){
                 perror("Sendto failed");
